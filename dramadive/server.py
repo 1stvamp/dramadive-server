@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 from sys import stdout
+from os.path import join, dirname
+
+from yaml import load
+
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application
 
@@ -28,6 +32,9 @@ application = Application([
 ])
 
 if __name__ == "__main__":
+    config = load(open(join(dirname(__file__), '../config.yaml'), 'r'))
+    application.dd_config = config
+
     application.listen(8888)
     print('Service started on http://localhost:8888/', file=stdout)
     IOLoop.instance().start()
