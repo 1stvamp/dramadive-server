@@ -16,8 +16,25 @@ from tornalet import tornalet
 setup_session()
 
 
+def climber_mode(config):
+    pass
+
+
+def generous_mode(config):
+    pass
+
+
+MODE_MAP = {
+    'climber': climber_mode,
+    'generous': generous_mode,
+}
+
 
 class MainHandler(RequestHandler):
+
+    def __init__(self, *args, **kwargs):
+        self.config = self.application.dd_config
+
     def prepare(self):
         self.set_header('Content-Type', 'application/json; charset="utf-8"')
 
@@ -25,6 +42,8 @@ class MainHandler(RequestHandler):
     def post(self):
         action = self.get_argument('action', '')
         self.write({'action': action})
+        if action == 'down':
+            MODE_MAP[self.config['mode']](self.config)
 
 
 application = Application([
