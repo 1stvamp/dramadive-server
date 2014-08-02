@@ -2,10 +2,11 @@
 
 from sys import stdout
 from os.path import join, dirname
+from time import time
 
 from yaml import load
 
-from tornado.ioloop import IOLoop
+from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.web import RequestHandler, Application
 
 from trequests import setup_session
@@ -16,12 +17,23 @@ from tornalet import tornalet
 setup_session()
 
 
-def climber_mode(config):
-    pass
+def climber_mode(config, action=False):
+    if action:
+        config['giving'] = 0.01
+    else:
+        config['giving'] += 0.10
+    print(config['giving'])
 
 
-def generous_mode(config):
-    pass
+def generous_mode(config, action=False):
+    if action:
+        config['giving'] += 0.10
+    else:
+        if config['giving'] > 0.10:
+            config['giving'] -= 0.10
+        else:
+            config['giving'] = 0.01
+    print(config['giving'])
 
 
 MODE_MAP = {
@@ -43,7 +55,7 @@ class MainHandler(RequestHandler):
         action = self.get_argument('action', '')
         self.write({'action': action})
         if action == 'down':
-            MODE_MAP[self.config['mode']](self.config)
+            MODE_MAP[self.config['mode']](self.config, True)
 
 
 application = Application([
@@ -52,8 +64,20 @@ application = Application([
 
 if __name__ == "__main__":
     config = load(open(join(dirname(__file__), '../config.yaml'), 'r'))
+    config['giving'] = 0.01
     application.dd_config = config
 
     application.listen(8888)
     print('Service started on http://localhost:8888/', file=stdout)
-    IOLoop.instance().start()
+
+    ioloop = IOLoop.instance()
+
+    mode_func = MODE_MAP[config['mode']]
+
+    callback = PeriodicCallback(
+            lambda: mode_func(config, False),
+            config.get('update', 60 * 60 * 24) * 1000,
+            ioloop)
+
+    callback.start()
+    ioloop.start()
