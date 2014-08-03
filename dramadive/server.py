@@ -89,10 +89,15 @@ class MainHandler(RequestHandler):
         if action == 'down':
             MODE_MAP[self.config['mode']](self.config, True)
 
+    def get(self):
+        self.render('index.html',
+                    giving="{0:.2f}".format(self.config['giving']))
 
-application = Application([
-    (r"/", MainHandler),
-])
+
+application = Application(
+    [(r"/", MainHandler)],
+    template_path=join(dirname(__file__), '../templates')
+)
 
 if __name__ == "__main__":
     config = load(open(join(dirname(__file__), '../config.yaml'), 'r'))

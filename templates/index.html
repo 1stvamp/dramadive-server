@@ -1,0 +1,21 @@
+<html>
+
+<head>
+<title>Drama Dive - Dashboard</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    var ws = new WebSocket("ws://" + document.location.host + ":8888/socket/");
+    ws.onmessage = function(event) {
+	$('h1').html('Giving: $' + event.data.giving);
+    };
+});
+</script>
+</head>
+
+<body>
+    <h1>Giving: ${{ giving }}</h1>
+    <div class="container"></div>
+</body>
+
+</html>
