@@ -1,9 +1,8 @@
 paypal:
   api:
-    username: 'xxx_xxx_apix.xxx.com'
-    password: 'xxxxxxxxxx'
-    signature: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-  email: 'custX_xxxxxxxxxx_per@xxxxxxxx.com'
+    client_id: 'xxxx'
+    client_secret: 'xxxx'
   visa_account_no: 'xxxxxxxxxxxxxxxx'
-  visa_expirey: 'mmyyyy'
+  visa_exp_month: 'mm'
+  visa_exp_year: 'yyyy'
 mode: 'climber'
