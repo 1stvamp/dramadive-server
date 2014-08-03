@@ -80,9 +80,6 @@ MODE_MAP = {
 
 class MainHandler(RequestHandler):
 
-    def __init__(self, *args, **kwargs):
-        self.config = self.application.dd_config
-
     def prepare(self):
         self.set_header('Content-Type', 'application/json; charset="utf-8"')
 
@@ -100,7 +97,7 @@ application = Application([
 if __name__ == "__main__":
     config = load(open(join(dirname(__file__), '../config.yaml'), 'r'))
     config['giving'] = 0.01
-    application.dd_config = config
+    MainHandler.config = config
 
     paypalrestsdk.configure({
         "mode": "sandbox",
