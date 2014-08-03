@@ -8,6 +8,7 @@ import paypalrestsdk
 from pprint import pprint
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.web import Application, RequestHandler
+from tornado.websocket import WebSocketHandler
 from yaml import load
 
 
@@ -51,25 +52,31 @@ def climber_mode(config, action=False):
     if action:
         config['giving'] = 0.01
     else:
-        config['giving'] += 0.10
-
         paypal_transfer(config)
 
-    print("{0:.2f}".format(config['giving']))
+        config['giving'] += 0.10
+
+    print(config['giving'])
+
+    for cb in SocketHandler.callbacks:
+        cb(config['giving'])
 
 
 def generous_mode(config, action=False):
     if action:
         config['giving'] += 0.10
     else:
+        paypal_transfer(config)
+
         if config['giving'] > 0.10:
             config['giving'] -= 0.10
         else:
             config['giving'] = 0.01
 
-        paypal_transfer(config)
+    print(config['giving'])
 
-    print("{0:.2f}".format(config['giving']))
+    for cb in SocketHandler.callbacks:
+        cb(config['giving'])
 
 
 MODE_MAP = {
@@ -80,22 +87,42 @@ MODE_MAP = {
 
 class MainHandler(RequestHandler):
 
-    def prepare(self):
+    def post(self):
         self.set_header('Content-Type', 'application/json; charset="utf-8"')
 
-    def post(self):
         action = self.get_argument('action', '')
         self.write({'action': action})
         if action == 'down':
             MODE_MAP[self.config['mode']](self.config, True)
 
     def get(self):
+        self.set_header('Content-Type', 'text/html; charset="utf-8"')
+
         self.render('index.html',
                     giving="{0:.2f}".format(self.config['giving']))
 
 
+class SocketHandler(WebSocketHandler):
+    callbacks = []
+
+    def open(self):
+        self.callbacks.append(self.call)
+
+    def on_message(self, msg):
+        pass
+
+    def on_close(self):
+        self.callbacks.remove(self.call)
+
+    def call(self, giving):
+        self.write_message("{0:.2f}".format(giving))
+
+
 application = Application(
-    [(r"/", MainHandler)],
+    [
+        (r"/", MainHandler),
+        (r"/socket/", SocketHandler)
+    ],
     template_path=join(dirname(__file__), '../templates')
 )
 

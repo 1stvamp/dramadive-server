@@ -5,16 +5,16 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript">
 $(function() {
-    var ws = new WebSocket("ws://" + document.location.host + ":8888/socket/");
+    var ws = new WebSocket("ws://" + document.location.host + "/socket/");
     ws.onmessage = function(event) {
-	$('h1').html('Giving: $' + event.data.giving);
+	$('h1').html('Giving: $' + event.data);
     };
 });
 </script>
 </head>
 
 <body>
-    <h1>Giving: ${{ giving }}</h1>
+    <h1 style="text-align:center;font-size:400%">Giving: ${{ giving }}</h1>
     <div class="container"></div>
 </body>
 
